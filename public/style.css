@@ -1,8 +1,10 @@
-/* --- Variables & Core --- */
+/* ===============================
+   ROOT VARIABLES
+================================= */
 
 :root {
-    --glass: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
     --text: #ffffff;
     --accent: #3b82f6;
 }
@@ -13,26 +15,26 @@ body {
     background: #020617;
     color: var(--text);
     min-height: 100vh;
-    /* Changed from height to min-height */
     overflow-x: hidden;
 }
 
 
-/* --- Animated Background --- */
+/* ===============================
+   ANIMATED BACKGROUND
+================================= */
 
 .mesh-gradient {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: -1;
     background: radial-gradient(at 0% 0%, #1e1b4b 0, transparent 50%), radial-gradient(at 100% 100%, #312e81 0, transparent 50%);
     filter: blur(100px);
 }
 
 
-/* --- Login & Dashboard Layout (Fixes "Squeezed" UI) --- */
+/* ===============================
+   LOGIN / DASHBOARD
+================================= */
 
 .login-wrapper {
     display: flex;
@@ -52,48 +54,60 @@ body {
     border: 1px solid var(--glass-border);
     width: 100%;
     max-width: 450px;
-    /* Prevents shrinking */
     text-align: center;
 }
 
 
-/* --- Video Grid UI --- */
+/* ===============================
+   VIDEO GRID SYSTEM (PRO)
+================================= */
 
 #video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
     padding: 100px 40px 150px;
+    box-sizing: border-box;
 }
+
+
+/* Each video */
 
 video {
     width: 100%;
-    height: 250px;
+    aspect-ratio: 16 / 9;
+    /* 🔥 Perfect video ratio */
     object-fit: cover;
     border-radius: 24px;
     border: 1px solid var(--glass-border);
     background: #000;
+    transition: 0.3s ease;
 }
 
 
-/* MIRROR FIX: Only flip YOUR camera */
+/* Mirror only your camera */
 
 #my-video {
     transform: scaleX(-1);
 }
 
 
-/* SCREEN SHARE UI: Bigger and NO mirror */
+/* ===============================
+   SCREEN SHARE STYLE
+================================= */
 
 .screen-share-video {
-    grid-column: span 2;
-    height: 450px !important;
+    grid-column: 1 / -1;
+    /* Full width */
+    aspect-ratio: 16 / 9;
     transform: scaleX(1) !important;
     border: 2px solid var(--accent) !important;
 }
 
 
-/* --- Floating Controls --- */
+/* ===============================
+   FLOATING CONTROLS
+================================= */
 
 .floating-controls {
     position: fixed;
@@ -107,27 +121,37 @@ video {
     display: flex;
     padding: 12px 24px;
     gap: 15px;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(20px);
     border-radius: 100px;
     border: 1px solid var(--glass-border);
 }
 
 .dock-item {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.1);
     color: white;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.25s ease;
+    font-size: 18px;
+}
+
+.dock-item:hover {
+    transform: scale(1.1);
 }
 
 .dock-item.muted,
 .dock-item.leave {
     background: #ef4444;
 }
+
+
+/* ===============================
+   INPUTS & BUTTONS
+================================= */
 
 input {
     width: 100%;
@@ -137,15 +161,37 @@ input {
     border: 1px solid var(--glass-border);
     background: rgba(0, 0, 0, 0.3);
     color: white;
+    outline: none;
 }
 
 .glass-btn {
     background: var(--accent);
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 14px 24px;
     border-radius: 12px;
     cursor: pointer;
     font-weight: bold;
     width: 100%;
+    transition: 0.25s ease;
+}
+
+.glass-btn:hover {
+    opacity: 0.9;
+}
+
+
+/* ===============================
+   RESPONSIVE FIXES
+================================= */
+
+@media (max-width: 768px) {
+    #video-grid {
+        padding: 80px 15px 140px;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    .dock-item {
+        width: 48px;
+        height: 48px;
+    }
 }
