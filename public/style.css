@@ -95,16 +95,30 @@ video {
 
 /* ONLY mirror your own webcam (usually the first video) */
 
-#video-grid video:first-child {
-    transform: scaleX(-1);
+
+/* If a video is a screen share, make it wider */
+
+video.screen-share-video {
+    grid-column: span 2;
+    /* Takes up two spots in the grid */
+    border: 2px solid var(--accent);
+    /* Highlight the shared screen */
+    transform: scaleX(1) !important;
+    /* Never mirror the screen */
+}
+
+
+/* Adjust grid for better spacing */
+
+#video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 15px;
+    padding: 20px;
 }
 
 
 /* NEVER mirror the screen share */
-
-video.screen-share-video {
-    transform: scaleX(1) !important;
-}
 
 
 /* Floating Navigation */

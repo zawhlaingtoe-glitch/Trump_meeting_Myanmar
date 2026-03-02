@@ -51,14 +51,48 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
 }
 
-function addVideoStream(video, stream) {
+// Function to add video with a specific ID attribute
+function addVideoStream(video, stream, userId = null) {
     video.srcObject = stream;
     video.setAttribute('playsinline', true);
+    if (userId) video.setAttribute('data-peer-id', userId); // Tag the video
+
     video.addEventListener('loadedmetadata', () => {
         video.play();
     });
     videoGrid.append(video);
 }
+
+// Fixed: Connect to new user
+function connectToNewUser(userId, stream) {
+    const call = myPeer.call(userId, stream);
+    const video = document.createElement('video');
+
+    call.on('stream', userVideoStream => {
+        // Avoid adding the same stream twice
+        if (!document.querySelector(`[data-peer-id="${userId}"]`)) {
+            addVideoStream(video, userVideoStream, userId);
+        }
+    });
+
+    call.on('close', () => {
+        video.remove();
+    });
+
+    peers[userId] = call;
+}
+
+// Fixed: Handle user leaving
+socket.on('user-disconnected', userId => {
+    console.log('User disconnected:', userId);
+    if (peers[userId]) {
+        peers[userId].close();
+        delete peers[userId];
+    }
+    // Force remove any video tagged with this ID
+    const videoElements = document.querySelectorAll(`[data-peer-id="${userId}"]`);
+    videoElements.forEach(el => el.remove());
+});
 
 
 // Updated Screen Share Logic
@@ -67,32 +101,26 @@ const screenBtn = document.getElementById('screen-btn');
 
 screenBtn.addEventListener('click', async() => {
     try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: true,
-            audio: false
-        });
-
-        // 1. Add to your own grid so you can see what you are sharing
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenVideo = document.createElement('video');
-        screenVideo.classList.add('screen-share-video'); // Mark as screen share
-        addVideoStream(screenVideo, screenStream);
+        screenVideo.classList.add('screen-share-video');
 
-        // 2. BROADCAST to everyone else
-        // We call every person currently in the 'peers' object
+        // Add locally
+        addVideoStream(screenVideo, screenStream, 'my-screen');
+
+        // Broadcast to others
         Object.keys(peers).forEach(userId => {
             myPeer.call(userId, screenStream);
         });
 
-        // 3. Handle stopping
         screenStream.getVideoTracks()[0].onended = () => {
             screenVideo.remove();
+            // Optional: socket.emit('stop-screen-share', ROOM_ID);
         };
-
     } catch (err) {
-        console.error("Screen share failed:", err);
+        console.error(err);
     }
 });
-
 // Replace your addVideoStream to handle the mirroring fix
 function addVideoStream(video, stream) {
     video.srcObject = stream;
