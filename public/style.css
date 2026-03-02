@@ -11,7 +11,7 @@
 
 
 /* ===============================
-   BODY
+   GLOBAL BODY
 ================================= */
 
 body {
@@ -25,7 +25,7 @@ body {
 
 
 /* ===============================
-   BLUR BACKGROUND
+   BACKGROUND EFFECT
 ================================= */
 
 .mesh-gradient {
@@ -103,7 +103,7 @@ body {
 
 
 /* ===============================
-   INPUTS (LOGIN PAGE)
+   INPUTS
 ================================= */
 
 input {
@@ -130,7 +130,7 @@ input:focus {
 
 
 /* ===============================
-   JOIN PAGE ICON INPUT
+   ICON INPUT
 ================================= */
 
 .input-container {
@@ -180,29 +180,104 @@ input:focus {
 
 
 /* ===============================
-   AUTH FOOTER
+   VIDEO GRID (IMPORTANT FIX ⭐)
 ================================= */
 
-.auth-footer {
-    margin-top: 20px;
-    font-size: 14px;
-    opacity: 0.85;
+#video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 100px 20px 140px;
+    justify-items: center;
 }
 
-.auth-footer a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 500;
+
+/* Video Elements */
+
+video {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    border-radius: 16px;
+    object-fit: cover;
+    background: black;
     transition: 0.3s ease;
 }
 
-.auth-footer a i {
-    margin-right: 6px;
+
+/* Local preview mirror */
+
+#my-video {
+    transform: scaleX(-1);
 }
 
-.auth-footer a:hover {
-    opacity: 0.8;
-    transform: translateX(-3px);
+
+/* ===============================
+   FLOATING CONTROL BAR
+================================= */
+
+.floating-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+.glass-dock {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 28px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ===============================
+   CONTROL BUTTONS
+================================= */
+
+.dock-item {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dock-item:hover {
+    transform: translateY(-4px) scale(1.08);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+
+/* Muted state */
+
+.dock-item.muted {
+    background: #ef4444;
+}
+
+
+/* Leave button */
+
+.dock-item.leave {
+    background: #ef4444;
+}
+
+.dock-item.leave:hover {
+    background: #dc2626;
+    transform: scale(1.1);
 }
 
 
@@ -242,81 +317,8 @@ input:focus {
     .glass-card {
         padding: 30px;
     }
-}
-
-#my-video {
-    transform: scaleX(-1);
-    /* mirror only local preview */
-}
-
-
-/* ===============================
-   FLOATING CONTROL BAR
-================================= */
-
-.floating-controls {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-}
-
-.glass-dock {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 14px 28px;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(20px);
-    border-radius: 100px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-
-/* ===============================
-   INDIVIDUAL BUTTON
-================================= */
-
-.dock-item {
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-/* Hover effect */
-
-.dock-item:hover {
-    transform: translateY(-4px) scale(1.08);
-    background: rgba(255, 255, 255, 0.15);
-}
-
-
-/* Active muted state */
-
-.dock-item.muted {
-    background: #ef4444;
-}
-
-
-/* Leave button special style */
-
-.dock-item.leave {
-    background: #ef4444;
-}
-
-.dock-item.leave:hover {
-    background: #dc2626;
-    transform: scale(1.1);
+    #video-grid {
+        grid-template-columns: 1fr;
+        padding-bottom: 180px;
+    }
 }
