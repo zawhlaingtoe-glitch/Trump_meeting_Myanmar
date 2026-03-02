@@ -60,6 +60,34 @@ function addVideoStream(video, stream) {
     videoGrid.append(video);
 }
 
+
+// Updated Screen Share Logic
+const screenBtn = document.getElementById('screen-btn');
+screenBtn.addEventListener('click', async() => {
+    try {
+        // 1. Ask browser for screen instead of camera
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: "always" },
+            audio: false
+        });
+
+        // 2. Create a new video box for the screen
+        const screenVideo = document.createElement('video');
+        screenVideo.classList.add('screen-share'); // Optional: for custom styling
+
+        // 3. Add to your grid
+        addVideoStream(screenVideo, screenStream);
+
+        // 4. Handle when you click "Stop Sharing" in the browser popup
+        screenStream.getVideoTracks()[0].onended = () => {
+            screenVideo.remove();
+        };
+
+    } catch (err) {
+        console.error("Screen share failed:", err);
+        alert("Could not share screen. Make sure you are on a Desktop browser.");
+    }
+});
 // Button Logic
 document.getElementById('mute-btn').addEventListener('click', () => {
     const enabled = myStream.getAudioTracks()[0].enabled;

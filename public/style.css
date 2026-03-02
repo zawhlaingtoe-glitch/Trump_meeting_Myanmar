@@ -292,3 +292,20 @@ input {
     color: white;
     transform: translateX(-5px);
 }
+
+
+/* This flips your local video so it's not mirrored */
+
+video {
+    transform: scaleX(-1);
+    /* Flips the video horizontally */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+}
+
+
+/* If you want the OTHER person to look normal, but NOT mirrored, 
+   you can apply this only to your own video. */
