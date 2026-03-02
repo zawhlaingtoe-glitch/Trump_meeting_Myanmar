@@ -5,7 +5,7 @@ const io = require('socket.io')(server);
 const { v4: uuidV4 } = require('uuid');
 const { ExpressPeerServer } = require('peer');
 
-// PeerJS Server Setup
+// Correct PeerJS Setup for Render
 const peerServer = ExpressPeerServer(server, {
     debug: true,
     path: '/'
@@ -13,7 +13,7 @@ const peerServer = ExpressPeerServer(server, {
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.use('/peerjs', peerServer);
+app.use('/peerjs', peerServer); // This creates the /peerjs endpoint
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
