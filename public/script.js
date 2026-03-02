@@ -13,19 +13,19 @@ const myPeer = new Peer(undefined, {
 let myStream;
 const peers = {};
 
-// 1. Get Camera IMMEDIATELY
+// 1. Get Camera and start initial call
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then(stream => {
     myStream = stream;
-    addVideoStream(myVideo, stream);
+    addVideoStream(myVideo, stream, 'my-video'); // Tag your own video
 
     myPeer.on('call', call => {
         call.answer(stream);
         const video = document.createElement('video');
         call.on('stream', userVideoStream => {
-            addVideoStream(video, userVideoStream);
+            addVideoStream(video, userVideoStream, call.peer);
         });
     });
 
@@ -34,7 +34,7 @@ navigator.mediaDevices.getUserMedia({
     });
 }).catch(err => {
     console.error("Camera Error:", err);
-    alert("Please allow camera access in your browser settings!");
+    alert("Please allow camera access!");
 });
 
 myPeer.on('open', id => {
@@ -45,107 +45,61 @@ function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream);
     const video = document.createElement('video');
     call.on('stream', userVideoStream => {
-        addVideoStream(video, userVideoStream);
+        addVideoStream(video, userVideoStream, userId);
     });
     call.on('close', () => video.remove());
     peers[userId] = call;
 }
 
-// Function to add video with a specific ID attribute
-function addVideoStream(video, stream, userId = null) {
+// Fixed: Correctly identifies and adds video boxes only once
+function addVideoStream(video, stream, id) {
+    if (document.getElementById(id)) return; // Prevent duplicate boxes
     video.srcObject = stream;
+    video.id = id;
     video.setAttribute('playsinline', true);
-    if (userId) video.setAttribute('data-peer-id', userId); // Tag the video
-
-    video.addEventListener('loadedmetadata', () => {
-        video.play();
-    });
+    video.addEventListener('loadedmetadata', () => video.play());
     videoGrid.append(video);
 }
 
-// Fixed: Connect to new user
-function connectToNewUser(userId, stream) {
-    const call = myPeer.call(userId, stream);
-    const video = document.createElement('video');
-
-    call.on('stream', userVideoStream => {
-        // Avoid adding the same stream twice
-        if (!document.querySelector(`[data-peer-id="${userId}"]`)) {
-            addVideoStream(video, userVideoStream, userId);
-        }
-    });
-
-    call.on('close', () => {
-        video.remove();
-    });
-
-    peers[userId] = call;
-}
-
-// Fixed: Handle user leaving
+// Fixed: Cleanup when user leaves
 socket.on('user-disconnected', userId => {
-    console.log('User disconnected:', userId);
-    if (peers[userId]) {
-        peers[userId].close();
-        delete peers[userId];
-    }
-    // Force remove any video tagged with this ID
-    const videoElements = document.querySelectorAll(`[data-peer-id="${userId}"]`);
-    videoElements.forEach(el => el.remove());
+    if (peers[userId]) peers[userId].close();
+    const video = document.getElementById(userId);
+    if (video) video.remove();
 });
 
-
-// Updated Screen Share Logic
-// Replace your existing screen-btn listener with this:
+// Fixed: Screen Sharing with proper broadcast
 const screenBtn = document.getElementById('screen-btn');
-
 screenBtn.addEventListener('click', async() => {
     try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenVideo = document.createElement('video');
-        screenVideo.classList.add('screen-share-video');
+        screenVideo.classList.add('screen-share-video'); // Adds the wide UI class
 
-        // Add locally
         addVideoStream(screenVideo, screenStream, 'my-screen');
 
-        // Broadcast to others
+        // Send screen to everyone currently in the room
         Object.keys(peers).forEach(userId => {
             myPeer.call(userId, screenStream);
         });
 
         screenStream.getVideoTracks()[0].onended = () => {
             screenVideo.remove();
-            // Optional: socket.emit('stop-screen-share', ROOM_ID);
         };
     } catch (err) {
         console.error(err);
     }
 });
-// Replace your addVideoStream to handle the mirroring fix
-function addVideoStream(video, stream) {
-    video.srcObject = stream;
-    video.setAttribute('playsinline', true);
-    video.addEventListener('loadedmetadata', () => {
-        video.play();
-    });
-    videoGrid.append(video);
-}
-// Button Logic
-document.getElementById('mute-btn').addEventListener('click', () => {
-    const enabled = myStream.getAudioTracks()[0].enabled;
-    myStream.getAudioTracks()[0].enabled = !enabled;
+
+// Control Buttons
+document.getElementById('mute-btn').onclick = () => {
+    myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
     document.getElementById('mute-btn').classList.toggle('muted');
-});
+};
 
-document.getElementById('camera-btn').addEventListener('click', () => {
-    const enabled = myStream.getVideoTracks()[0].enabled;
-    myStream.getVideoTracks()[0].enabled = !enabled;
+document.getElementById('camera-btn').onclick = () => {
+    myStream.getVideoTracks()[0].enabled = !myStream.getVideoTracks()[0].enabled;
     document.getElementById('camera-btn').classList.toggle('muted');
-});
-
-window.copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Link copied!");
 };
 
 window.leaveMeeting = () => window.location.href = '/dashboard';

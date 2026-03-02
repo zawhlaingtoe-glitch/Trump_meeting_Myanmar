@@ -70,14 +70,14 @@ video {
 /* --- Mirroring & Screen Share Logic --- */
 
 
-/* 1. Mirror ONLY your own local camera (usually the first child) */
+/* 1. Mirror ONLY your own local camera (tagged as my-video in script.js) */
 
-#video-grid video:first-child {
+#video-grid video#my-video {
     transform: scaleX(-1);
 }
 
 
-/* 2. Fix for Screen Share: Make it bigger and NEVER mirror it */
+/* 2. Fix for Screen Share: Make it twice as wide and NEVER mirror it */
 
 video.screen-share-video {
     transform: scaleX(1) !important;
@@ -86,9 +86,9 @@ video.screen-share-video {
 }
 
 
-/* 3. Ensure other participants appear normal */
+/* 3. Ensure other participants appear normal (not mirrored) */
 
-video[data-peer-id]:not(:first-child) {
+video[id]:not(#my-video):not(.screen-share-video) {
     transform: scaleX(1);
 }
 
@@ -151,7 +151,34 @@ video[data-peer-id]:not(:first-child) {
 }
 
 
-/* --- Landing & Dashboard Specifics --- */
+/* --- Tooltip style --- */
+
+.dock-item:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 70px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+
+/* --- Mobile Responsive Grid --- */
+
+@media (max-width: 768px) {
+    #video-grid {
+        grid-template-columns: 1fr;
+        padding: 80px 10px 100px;
+    }
+    video.screen-share-video {
+        grid-column: span 1;
+    }
+}
+
+
+/* --- Auth & Dashboard Pages --- */
 
 .login-wrapper {
     display: flex;
@@ -191,31 +218,4 @@ input {
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
-}
-
-
-/* --- Tooltip style --- */
-
-.dock-item:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 70px;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-
-/* --- Mobile Responsive Grid --- */
-
-@media (max-width: 768px) {
-    #video-grid {
-        grid-template-columns: 1fr;
-        padding: 80px 10px 100px;
-    }
-    video.screen-share-video {
-        grid-column: span 1;
-    }
 }
