@@ -5,7 +5,9 @@ const io = require('socket.io')(server);
 const { v4: uuidV4 } = require('uuid');
 const { ExpressPeerServer } = require('peer');
 
-// Correct PeerJS Setup for Render
+// Essential for Render/Heroku HTTPS
+app.set('trust proxy', 1);
+
 const peerServer = ExpressPeerServer(server, {
     debug: true,
     path: '/'
@@ -13,26 +15,34 @@ const peerServer = ExpressPeerServer(server, {
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.use('/peerjs', peerServer); // This creates the /peerjs endpoint
+app.use('/peerjs', peerServer);
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// --- ROUTES ---
 app.get('/', (req, res) => res.render('login'));
-app.get('/signup', (req, res) => res.render('signup'));
+
 app.post('/login', (req, res) => {
-    const userName = req.body.username || 'Guest';
-    res.render('dashboard', { userName });
+    // We use a simple render here to avoid session crashes
+    res.render('dashboard', { userName: req.body.username || 'Guest' });
 });
+
 app.get('/dashboard', (req, res) => res.render('dashboard', { userName: 'User' }));
-app.get('/host', (req, res) => res.redirect(`/${uuidV4()}`));
+
+app.get('/host', (req, res) => {
+    res.redirect(`/${uuidV4()}`);
+});
+
 app.get('/join', (req, res) => res.render('join'));
-app.post('/join-room', (req, res) => res.redirect(`/${req.body.roomId}`));
+
+app.post('/join-room', (req, res) => {
+    res.redirect(`/${req.body.roomId}`);
+});
 
 app.get('/:room', (req, res) => {
     res.render('room', { roomId: req.params.room });
 });
 
-// Socket Logic
+// --- SOCKETS ---
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId);
@@ -45,4 +55,4 @@ io.on('connection', socket => {
 });
 
 const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => console.log(`Server live on ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`Server is running on port ${PORT}`));
