@@ -1,3 +1,5 @@
+/* --- Variables & Core --- */
+
 :root {
     --glass: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
@@ -15,7 +17,7 @@ body {
 }
 
 
-/* Animated Background */
+/* --- Animated Background --- */
 
 .mesh-gradient {
     position: fixed;
@@ -29,7 +31,7 @@ body {
 }
 
 
-/* Glass Elements */
+/* --- Glass Elements --- */
 
 .glass-card,
 .glass-nav,
@@ -42,46 +44,17 @@ body {
 }
 
 
-/* Landing Layout */
-
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    gap: 40px;
-}
-
-.glow-text {
-    font-size: 3.5rem;
-    text-align: center;
-    background: linear-gradient(to right, #fff, #94a3b8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
-}
-
-.login-box {
-    padding: 40px;
-    width: 350px;
-    text-align: center;
-}
-
-
-/* Video Grid Layout */
+/* --- Video Grid Layout --- */
 
 #video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 20px;
     padding: 100px 40px 120px;
     height: calc(100vh - 220px);
     overflow-y: auto;
+    align-items: center;
 }
-
-
-/* All videos look normal by default */
 
 video {
     width: 100%;
@@ -90,43 +63,37 @@ video {
     border-radius: 24px;
     border: 1px solid var(--glass-border);
     background-color: #000;
+    transition: transform 0.3s ease;
 }
 
 
-/* ONLY mirror your own webcam (usually the first video) */
+/* --- Mirroring & Screen Share Logic --- */
+
+
+/* 1. Mirror ONLY your own local camera (usually the first child) */
 
 #video-grid video:first-child {
     transform: scaleX(-1);
 }
 
+
+/* 2. Fix for Screen Share: Make it bigger and NEVER mirror it */
+
 video.screen-share-video {
+    transform: scaleX(1) !important;
     grid-column: span 2;
-    /* Takes up two spots in the grid */
     border: 2px solid var(--accent);
-    /* Highlight the shared screen */
-    transform: scaleX(1) !important;
-    /* Never mirror the screen */
 }
 
 
-/* Adjust grid for better spacing */
+/* 3. Ensure other participants appear normal */
 
-#video-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 15px;
-    padding: 20px;
+video[data-peer-id]:not(:first-child) {
+    transform: scaleX(1);
 }
 
 
-/* NEVER mirror the screen share */
-
-video.screen-share-video {
-    transform: scaleX(1) !important;
-}
-
-
-/* Floating Navigation */
+/* --- Floating Navigation & UI --- */
 
 .glass-nav {
     position: fixed;
@@ -140,9 +107,6 @@ video.screen-share-video {
     align-items: center;
     z-index: 100;
 }
-
-
-/* Control Dock */
 
 .floating-controls {
     position: fixed;
@@ -168,6 +132,9 @@ video.screen-share-video {
     color: white;
     cursor: pointer;
     transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dock-item:hover {
@@ -179,8 +146,30 @@ video.screen-share-video {
     background: #ef4444;
 }
 
+.dock-item.muted {
+    background: #ef4444 !important;
+}
 
-/* Input Styling */
+
+/* --- Landing & Dashboard Specifics --- */
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 40px;
+}
+
+.glow-text {
+    font-size: 3.5rem;
+    text-align: center;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
 
 input {
     width: 100%;
@@ -204,83 +193,8 @@ input {
     transition: 0.3s;
 }
 
-.glass-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
 
-
-/* Dashboard Specifics */
-
-.dashboard-box {
-    padding: 50px;
-    width: 450px;
-}
-
-.user-profile {
-    margin-bottom: 30px;
-}
-
-.avatar {
-    font-size: 50px;
-    color: var(--accent);
-    margin-bottom: 10px;
-}
-
-.action-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.action-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    padding: 25px;
-    border-radius: 20px;
-    text-decoration: none;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    transition: 0.3s;
-}
-
-.action-card i {
-    font-size: 24px;
-    color: var(--accent);
-}
-
-.action-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-5px);
-}
-
-.logout-link {
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.logout-link:hover {
-    color: #ef4444;
-}
-
-
-/* Control Button States (Active/Muted) */
-
-.dock-item.active {
-    background: var(--accent);
-    box-shadow: 0 0 15px var(--accent);
-}
-
-.dock-item.muted {
-    background: #ef4444 !important;
-}
-
-
-/* Tooltip style on hover */
+/* --- Tooltip style --- */
 
 .dock-item:hover::after {
     content: attr(title);
@@ -294,45 +208,14 @@ input {
 }
 
 
-/* Join Page Specifics */
+/* --- Mobile Responsive Grid --- */
 
-.input-group {
-    position: relative;
-    width: 100%;
+@media (max-width: 768px) {
+    #video-grid {
+        grid-template-columns: 1fr;
+        padding: 80px 10px 100px;
+    }
+    video.screen-share-video {
+        grid-column: span 1;
+    }
 }
-
-.icon-label {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.4);
-    pointer-events: none;
-}
-
-.input-group input {
-    padding-left: 45px !important;
-    /* Move text over for the icon */
-}
-
-.back-link {
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 0.9rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-}
-
-.back-link:hover {
-    color: white;
-    transform: translateX(-5px);
-}
-
-
-/* This flips your local video so it's not mirrored */
-
-
-/* If you want the OTHER person to look normal, but NOT mirrored, 
-   you can apply this only to your own video. */
