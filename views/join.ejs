@@ -4,36 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Meeting | Enter ID</title>
+    <title>Join Meeting</title>
     <link rel="stylesheet" href="/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/c9c589714d.js" crossorigin="anonymous"></script>
 </head>
 
-<body class="glass-bg">
+<body>
     <div class="mesh-gradient"></div>
-
     <div class="login-wrapper">
-        <header class="hero-section">
-            <h1 class="glow-text">Join a Meeting</h1>
-            <p class="subtitle">Enter the Room ID provided by the host.</p>
-        </header>
-
-        <div class="glass-card login-box">
+        <div class="glass-card">
+            <h2 class="glow-text" style="font-size: 2rem;">Join Meeting</h2>
             <form action="/join-room" method="POST">
-                <div class="input-group">
-                    <i class="fas fa-key icon-label"></i>
-                    <input type="text" name="roomId" placeholder="Enter Room ID" required autocomplete="off">
-                </div>
-                <button type="submit" class="glass-btn primary">
-                    <i class="fas fa-sign-in-alt"></i> Join Now
-                </button>
+                <input type="text" name="roomId" placeholder="Enter Room ID" required>
+                <button type="submit" class="glass-btn" style="width: 100%;">Join Now</button>
             </form>
-
-            <div class="auth-footer">
-                <a href="/dashboard" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
+            <div style="margin-top: 20px;">
+                <a href="/dashboard" style="color: #94a3b8; text-decoration: none;">← Back to Dashboard</a>
             </div>
         </div>
     </div>

@@ -13,24 +13,27 @@ const myPeer = new Peer(undefined, {
 let myStream;
 const peers = {};
 
+// 1. Get Camera
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then(stream => {
     myStream = stream;
-    addVideoStream(myVideo, stream, 'my-video'); // Unique ID for your camera 
+    addVideoStream(myVideo, stream, 'my-video'); // Label your camera
 
     myPeer.on('call', call => {
         call.answer(stream);
         const video = document.createElement('video');
         call.on('stream', userVideoStream => {
-            addVideoStream(video, userVideoStream, call.peer); // ID based on Peer ID 
+            addVideoStream(video, userVideoStream, call.peer);
         });
     });
 
     socket.on('user-connected', userId => {
         setTimeout(() => connectToNewUser(userId, stream), 1000);
     });
+}).catch(err => {
+    console.error("Camera Error:", err);
 });
 
 function connectToNewUser(userId, stream) {
@@ -43,9 +46,9 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
 }
 
-// THE KEY FIX: Check for ID before adding 
+// THE FIX: Check ID to prevent duplicate "three screens"
 function addVideoStream(video, stream, id) {
-    if (id && document.getElementById(id)) return; // Stop if already exists 
+    if (id && document.getElementById(id)) return;
     video.srcObject = stream;
     if (id) video.id = id;
     video.setAttribute('playsinline', true);
@@ -56,20 +59,20 @@ function addVideoStream(video, stream, id) {
 socket.on('user-disconnected', userId => {
     if (peers[userId]) peers[userId].close();
     const video = document.getElementById(userId);
-    if (video) video.remove(); // Clean up immediately 
+    if (video) video.remove();
 });
 
 myPeer.on('open', id => {
     socket.emit('join-room', ROOM_ID, id);
 });
 
-// Screen Sharing Logic
+// Screen Share Fix
 document.getElementById('screen-btn').onclick = async() => {
     try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenVideo = document.createElement('video');
         screenVideo.classList.add('screen-share-video');
-        addVideoStream(screenVideo, screenStream, 'my-screen'); // Unique ID for screen [cite: 1, 2]
+        addVideoStream(screenVideo, screenStream, 'my-screen');
 
         Object.keys(peers).forEach(userId => {
             myPeer.call(userId, screenStream);
@@ -79,17 +82,7 @@ document.getElementById('screen-btn').onclick = async() => {
     } catch (err) { console.error(err); }
 };
 
-// Controls and Copy Link Fix 
-window.copyLink = () => {
-    const el = document.createElement('textarea');
-    el.value = window.location.href;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    alert("Link copied!");
-};
-
+// Controls
 document.getElementById('mute-btn').onclick = () => {
     myStream.getAudioTracks()[0].enabled = !myStream.getAudioTracks()[0].enabled;
     document.getElementById('mute-btn').classList.toggle('muted');
@@ -98,6 +91,17 @@ document.getElementById('mute-btn').onclick = () => {
 document.getElementById('camera-btn').onclick = () => {
     myStream.getVideoTracks()[0].enabled = !myStream.getVideoTracks()[0].enabled;
     document.getElementById('camera-btn').classList.toggle('muted');
+};
+
+// Copy Link Fix
+window.copyLink = () => {
+    const el = document.createElement('textarea');
+    el.value = window.location.href;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    alert("Meeting link copied!");
 };
 
 window.leaveMeeting = () => window.location.href = '/dashboard';

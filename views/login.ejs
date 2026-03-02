@@ -4,32 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zaw Hlaing Trump's Meeting</title>
+    <title>Login | Meeting App</title>
     <link rel="stylesheet" href="/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="glass-bg">
+<body>
     <div class="mesh-gradient"></div>
-
     <div class="login-wrapper">
         <header class="hero-section">
-            <h1 class="glow-text">Zaw Hlaing Trump's Meeting</h1>
-            <p class="subtitle">Experience the future of secure collaboration.</p>
+            <h1 class="glow-text">Welcome Back</h1>
+            <p class="subtitle">Secure video collaboration.</p>
         </header>
 
-        <div class="glass-card login-box">
+        <div class="glass-card">
             <form action="/login" method="POST">
-                <div class="input-group">
-                    <input type="text" name="username" placeholder="Username" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" name="password" placeholder="Password" required>
-                </div>
-                <button type="submit" class="glass-btn primary">Enter Meeting</button>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="glass-btn" style="width: 100%;">Enter Meeting</button>
             </form>
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="/signup">Sign Up</a></p>
+            <div style="margin-top: 20px; font-size: 0.9rem; color: #94a3b8;">
+                Don't have an account? <a href="/signup" style="color: var(--accent);">Sign Up</a>
             </div>
         </div>
     </div>

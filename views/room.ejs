@@ -11,7 +11,6 @@
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script>
         const ROOM_ID = "<%= roomId %>";
-        const USER_NAME = "<%= typeof userName !== 'undefined' ? userName : 'Guest' %>";
     </script>
 </head>
 
@@ -21,7 +20,7 @@
     <div class="glass-nav">
         <div class="room-info">
             <span class="live-indicator"></span>
-            <h2>Zaw Hlaing Trump's Meeting</h2>
+            <h2>Meeting Active</h2>
         </div>
         <button onclick="copyLink()" class="glass-btn sm">
             <i class="fas fa-link"></i> Copy Link
@@ -41,8 +40,8 @@
             <button id="screen-btn" class="dock-item" title="Share Screen">
                 <i class="fas fa-desktop"></i>
             </button>
-            <button onclick="leaveMeeting()" class="dock-item leave" title="End Call">
-                <i class="fas fa-phone"></i>
+            <button onclick="leaveMeeting()" class="dock-item leave" title="Leave">
+                <i class="fas fa-phone-slash"></i>
             </button>
         </div>
     </div>
