@@ -1,42 +1,48 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const server = require("http").Server(app);
-const io = require("socket.io")(server);
-const { v4: uuidV4 } = require("uuid");
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const { v4: uuidV4 } = require('uuid');
+const { ExpressPeerServer } = require('peer');
 
-app.set("view engine", "ejs");
-app.use(express.static("public"));
+// PeerJS Server Setup
+const peerServer = ExpressPeerServer(server, {
+    debug: true,
+    path: '/'
+});
+
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use('/peerjs', peerServer);
 app.use(express.urlencoded({ extended: true }));
 
-// Simple Routes
-app.get("/", (req, res) => res.render("login"));
-app.get("/signup", (req, res) => res.render("signup"));
+// Routes
+app.get('/', (req, res) => res.render('login'));
+app.get('/signup', (req, res) => res.render('signup'));
+app.post('/login', (req, res) => {
+    const userName = req.body.username || 'Guest';
+    res.render('dashboard', { userName });
+});
+app.get('/dashboard', (req, res) => res.render('dashboard', { userName: 'User' }));
+app.get('/host', (req, res) => res.redirect(`/${uuidV4()}`));
+app.get('/join', (req, res) => res.render('join'));
+app.post('/join-room', (req, res) => res.redirect(`/${req.body.roomId}`));
 
-app.post("/login", (req, res) => {
-    const userName = req.body.username || "Guest";
-    res.render("dashboard", { userName });
+app.get('/:room', (req, res) => {
+    res.render('room', { roomId: req.params.room });
 });
 
-app.get("/dashboard", (req, res) => res.render("dashboard", { userName: "User" }));
-app.get("/host", (req, res) => res.redirect(`/${uuidV4()}`));
-app.get("/join", (req, res) => res.render("join"));
-app.post("/join-room", (req, res) => res.redirect(`/${req.body.roomId}`));
-
-app.get("/:room", (req, res) => {
-    res.render("room", { roomId: req.params.room });
-});
-
-// Basic Video Signaling
-io.on("connection", socket => {
-    socket.on("join-room", (roomId, userId) => {
+// Socket Logic
+io.on('connection', socket => {
+    socket.on('join-room', (roomId, userId) => {
         socket.join(roomId);
-        socket.to(roomId).emit("user-connected", userId);
+        socket.to(roomId).emit('user-connected', userId);
 
-        socket.on("disconnect", () => {
-            socket.to(roomId).emit("user-disconnected", userId);
+        socket.on('disconnect', () => {
+            socket.to(roomId).emit('user-disconnected', userId);
         });
     });
 });
 
 const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server live on ${PORT}`));

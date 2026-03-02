@@ -10,6 +10,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const ROOM_ID = "<%= roomId %>";
+        const USER_NAME = "<%= userName %>";
     </script>
 </head>
 
@@ -21,16 +22,27 @@
             <span class="live-indicator"></span>
             <h2>Zaw Hlaing Trump's Meeting</h2>
         </div>
-        <button onclick="copyLink()" class="glass-btn sm">Copy Link</button>
+        <button onclick="copyLink()" class="glass-btn sm">
+            <i class="fas fa-link"></i> Copy Link
+        </button>
     </div>
 
     <div id="video-grid"></div>
 
     <div class="floating-controls">
         <div class="glass-dock">
-            <button id="mute-btn" class="dock-item"><i class="fas fa-microphone"></i></button>
-            <button id="camera-btn" class="dock-item"><i class="fas fa-video"></i></button>
-            <button onclick="leaveMeeting()" class="dock-item leave"><i class="fas fa-phone"></i></button>
+            <button id="mute-btn" class="dock-item" title="Mute/Unmute">
+            <i class="fas fa-microphone"></i>
+        </button>
+            <button id="camera-btn" class="dock-item" title="Start/Stop Video">
+            <i class="fas fa-video"></i>
+        </button>
+            <button id="screen-btn" class="dock-item" title="Share Screen">
+            <i class="fas fa-desktop"></i>
+        </button>
+            <button onclick="leaveMeeting()" class="dock-item leave" title="End Call">
+            <i class="fas fa-phone"></i>
+        </button>
         </div>
     </div>
 
