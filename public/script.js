@@ -52,12 +52,14 @@ function connectToNewUser(userId, stream) {
 }
 
 // Fixed: Correctly identifies and adds video boxes only once
-function addVideoStream(video, stream, id) {
-    if (document.getElementById(id)) return; // Prevent duplicate boxes
+function addVideoStream(video, stream, userId = null) {
     video.srcObject = stream;
-    video.id = id;
     video.setAttribute('playsinline', true);
-    video.addEventListener('loadedmetadata', () => video.play());
+    if (userId) video.setAttribute('data-peer-id', userId); // Essential for cleanup
+
+    video.addEventListener('loadedmetadata', () => {
+        video.play();
+    });
     videoGrid.append(video);
 }
 
@@ -103,3 +105,21 @@ document.getElementById('camera-btn').onclick = () => {
 };
 
 window.leaveMeeting = () => window.location.href = '/dashboard';
+
+/* --- Updated script.js Fix --- */
+window.copyLink = () => {
+    const roomUrl = window.location.href;
+    navigator.clipboard.writeText(roomUrl).then(() => {
+        alert("Meeting link copied to clipboard!");
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = roomUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        alert("Meeting link copied!");
+    });
+};

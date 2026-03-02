@@ -7,13 +7,37 @@
     --accent: #3b82f6;
 }
 
+
+/* --- Updated style.css fixes --- */
+
 body {
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
     background: #020617;
     color: var(--text);
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    /* Changed from height to min-height */
+    overflow-y: auto;
+    /* Allow scrolling */
+}
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    /* Ensure it covers the screen but can grow */
+    padding: 20px;
+    /* Prevents boxes from touching screen edges */
+    gap: 40px;
+}
+
+.glass-card {
+    width: 100%;
+    max-width: 400px;
+    /* Prevents the squeezed look */
+    padding: 40px;
 }
 
 
