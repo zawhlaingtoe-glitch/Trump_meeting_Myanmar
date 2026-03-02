@@ -4,6 +4,15 @@ const videoGrid = document.getElementById('video-grid');
 const myVideo = document.createElement('video');
 myVideo.muted = true;
 myVideo.id = 'my-video';
+const fs = require('fs');
+
+function readDB() {
+    return JSON.parse(fs.readFileSync('db.json'));
+}
+
+function writeDB(data) {
+    fs.writeFileSync('db.json', JSON.stringify(data, null, 2));
+}
 
 const myPeer = new Peer(undefined, {
     path: '/peerjs',

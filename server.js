@@ -44,6 +44,44 @@ app.get('/:room', (req, res) => {
     });
 });
 
+
+
+
+app.post('/signup', (req, res) => {
+
+    const { username, password } = req.body;
+
+    const db = readDB();
+
+    const userExists = db.users.find(u => u.username === username);
+
+    if (userExists) {
+        return res.send("User already exists");
+    }
+
+    db.users.push({ username, password });
+
+    writeDB(db);
+
+    res.redirect('/');
+});
+
+app.post('/login', (req, res) => {
+
+    const { username, password } = req.body;
+
+    const db = readDB();
+
+    const user = db.users.find(
+        u => u.username === username && u.password === password
+    );
+
+    if (!user) {
+        return res.send("Invalid credentials");
+    }
+
+    res.render('dashboard', { userName: username });
+});
 // --- SOCKETS ---
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {
