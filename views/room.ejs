@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Room</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial;
+            text-align: center;
+        }
+        
+        #video-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        video {
+            width: 300px;
+            margin: 10px;
+            border-radius: 10px;
+            background: black;
+            transform: scaleX(-1);
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+        }
+        
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>ZOOM CLONE</h2>
+    <div id="video-grid"></div>
+    <div class="controls">
+        <button id="camera-btn">Toggle Camera</button>
+        <button id="mute-btn">Toggle Mute</button>
+        <button id="screen-btn">Share Screen</button>
+        <button onclick="copyLink()">Copy Invite Link</button>
+        <button onclick="leaveMeeting()">Leave</button>
+    </div>
+    <script>
+        const ROOM_ID = "<%= roomId %>";
+        const USER_NAME = "<%= userName %>";
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/script.js"></script>
+</body>
+
+</html>
