@@ -31,7 +31,14 @@ app.get('/dashboard', (req, res) => {
         userName: 'User'
     });
 });
-
+/* --- Add this POST route to fix the error --- */
+app.post('/login', (req, res) => {
+    const userName = req.body.username || 'Guest';
+    // After login, we send them to the dashboard with their name
+    res.render('dashboard', {
+        userName: userName
+    });
+});
 app.get('/host', (req, res) => {
     res.redirect(`/${uuidV4()}`);
 });
