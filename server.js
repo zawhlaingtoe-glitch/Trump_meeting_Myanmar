@@ -1,98 +1,93 @@
 const express = require('express');
 const app = express();
+
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+
 const { v4: uuidV4 } = require('uuid');
 const { ExpressPeerServer } = require('peer');
 
 app.set('trust proxy', 1);
+app.set('view engine', 'ejs');
 
-const peerServer = ExpressPeerServer(server, {
+app.use(express.static('public'));
+app.use('/peerjs', ExpressPeerServer(server, {
     debug: true,
     path: '/'
-});
+}));
 
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use('/peerjs', peerServer);
 app.use(express.urlencoded({ extended: true }));
 
-// --- ROUTES ---
-app.get('/', (req, res) => res.render('login'));
+/* =============================
+   ROUTES
+============================= */
 
-app.post('/login', (req, res) => {
-    res.render('dashboard', { userName: req.body.username || 'Guest' });
+app.get('/', (req, res) => {
+    res.render('login');
 });
 
-app.get('/dashboard', (req, res) => res.render('dashboard', { userName: 'User' }));
+/* LOGIN (NO DATABASE CHECKING) */
+app.post('/login', (req, res) => {
+    res.render('dashboard', {
+        userName: req.body.username || 'Guest'
+    });
+});
 
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard', {
+        userName: 'User'
+    });
+});
+
+/* HOST ROOM */
 app.get('/host', (req, res) => {
     res.redirect(`/${uuidV4()}`);
 });
 
-app.get('/join', (req, res) => res.render('join'));
+/* JOIN ROOM PAGE */
+app.get('/join', (req, res) => {
+    res.render('join');
+});
 
+/* JOIN ROOM POST */
 app.post('/join-room', (req, res) => {
     res.redirect(`/${req.body.roomId}`);
 });
 
-// FIX: Added userName here to prevent the EJS error
+/* ROOM PAGE */
 app.get('/:room', (req, res) => {
     res.render('room', {
         roomId: req.params.room,
-        userName: 'User' // This provides the missing variable
+        userName: 'User'
     });
 });
 
+/* =============================
+   SOCKETS
+============================= */
 
-
-
-app.post('/signup', (req, res) => {
-
-    const { username, password } = req.body;
-
-    const db = readDB();
-
-    const userExists = db.users.find(u => u.username === username);
-
-    if (userExists) {
-        return res.send("User already exists");
-    }
-
-    db.users.push({ username, password });
-
-    writeDB(db);
-
-    res.redirect('/');
-});
-
-app.post('/login', (req, res) => {
-
-    const { username, password } = req.body;
-
-    const db = readDB();
-
-    const user = db.users.find(
-        u => u.username === username && u.password === password
-    );
-
-    if (!user) {
-        return res.send("Invalid credentials");
-    }
-
-    res.render('dashboard', { userName: username });
-});
-// --- SOCKETS ---
 io.on('connection', socket => {
+
     socket.on('join-room', (roomId, userId) => {
+
         socket.join(roomId);
+
         socket.to(roomId).emit('user-connected', userId);
 
         socket.on('disconnect', () => {
             socket.to(roomId).emit('user-disconnected', userId);
         });
+
     });
+
 });
 
+/* =============================
+   SERVER START
+============================= */
+
 const PORT = process.env.PORT || 10000;
-server.listen(PORT, '0.0.0.0', () => console.log(`Server is running on port ${PORT}`));
+
+server.listen(PORT, '0.0.0.0', () =>
+    console.log(`Server is running on port ${PORT}`)
+);
