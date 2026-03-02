@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Meeting</title>
     <link rel="stylesheet" href="/style.css">
+    <script src="https://kit.fontawesome.com/c9c589714d.js" crossorigin="anonymous"></script>
 </head>
 
-<body>
+<body class="glass-bg">
+    <div class="mesh-gradient"></div>
+    <div class="login-wrapper">
+        <div class="glass-card dashboard-box">
+            <div class="user-profile">
+                <div class="avatar"><i class="fas fa-user-circle"></i></div>
+                <h2>Welcome,
+                    <%= userName %>
+                </h2>
+            </div>
 
-    <div class="glass">
+            <div class="action-grid">
+                <a href="/host" class="action-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Host Meeting</span>
+                </a>
+                <a href="/join" class="action-card">
+                    <i class="fas fa-door-open"></i>
+                    <span>Join Meeting</span>
+                </a>
+            </div>
 
-        <h2>Welcome
-            <%= userName %>
-        </h2>
-
-        <hr>
-
-        <a href="/host">
-            <button>Host Meeting</button>
-        </a>
-
-        <br><br>
-
-        <a href="/join">
-            <button>Join Meeting</button>
-        </a>
-
-        <br><br>
-
-        <a href="/logout">
-            <button>Logout</button>
-        </a>
-
+            <a href="/" class="logout-link">Sign Out</a>
+        </div>
     </div>
-
 </body>
 
 </html>
