@@ -1,36 +1,173 @@
+:root {
+    --glass: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text: #ffffff;
+    --accent: #3b82f6;
+}
+
 body {
-    font-family: Arial;
-    background: linear-gradient(135deg, #4a6cf7, #9b59b6);
-    color: white;
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #020617;
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+}
+
+
+/* Animated Background */
+
+.mesh-gradient {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(at 0% 0%, #1e1b4b 0, transparent 50%), radial-gradient(at 100% 100%, #312e81 0, transparent 50%), radial-gradient(at 50% 50%, #1e3a8a 0, transparent 50%);
+    filter: blur(100px);
+}
+
+
+/* Glass Elements */
+
+.glass-card,
+.glass-nav,
+.glass-dock {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+}
+
+
+/* Landing Layout */
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 40px;
+}
+
+.glow-text {
+    font-size: 3.5rem;
+    text-align: center;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+.login-box {
+    padding: 40px;
+    width: 350px;
     text-align: center;
 }
 
-.glass {
-    backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 30px;
-    width: 300px;
-    margin: auto;
-    margin-top: 80px;
-}
 
-input {
-    width: 90%;
-    padding: 12px;
-    margin: 10px;
-    border-radius: 10px;
-    border: none;
-}
+/* Video Grid Layout */
 
-button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    background: #00d4ff;
-    cursor: pointer;
+#video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    padding: 100px 40px 120px;
+    height: calc(100vh - 220px);
+    overflow-y: auto;
 }
 
 video {
-    transform: scaleX(-1);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+}
+
+
+/* Floating Navigation */
+
+.glass-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+
+/* Control Dock */
+
+.floating-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+.glass-dock {
+    display: flex;
+    padding: 10px 20px;
+    gap: 15px;
+    border-radius: 100px;
+}
+
+.dock-item {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.dock-item:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+}
+
+.dock-item.leave {
+    background: #ef4444;
+}
+
+
+/* Input Styling */
+
+input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    box-sizing: border-box;
+}
+
+.glass-btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--accent);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.glass-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
 }

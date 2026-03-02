@@ -1,63 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Room</title>
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            color: white;
-            font-family: Arial;
-            text-align: center;
-        }
-        
-        #video-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        video {
-            width: 300px;
-            margin: 10px;
-            border-radius: 10px;
-            background: black;
-            transform: scaleX(-1);
-        }
-        
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            width: 100%;
-        }
-        
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-
-<body>
-    <h2>ZOOM CLONE</h2>
-    <div id="video-grid"></div>
-    <div class="controls">
-        <button id="camera-btn">Toggle Camera</button>
-        <button id="mute-btn">Toggle Mute</button>
-        <button id="screen-btn">Share Screen</button>
-        <button onclick="copyLink()">Copy Invite Link</button>
-        <button onclick="leaveMeeting()">Leave</button>
-    </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Room</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://kit.fontawesome.com/c9c589714d.js" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         const ROOM_ID = "<%= roomId %>";
         const USER_NAME = "<%= userName %>";
     </script>
-    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body class="room-page">
+    <div class="mesh-gradient"></div>
+
+    <div class="glass-nav">
+        <div class="room-info">
+            <span class="live-indicator"></span>
+            <h2>Zaw Hlaing Trump's Meeting</h2>
+        </div>
+        <button onclick="copyLink()" class="glass-btn sm">
+            <i class="fas fa-link"></i> Copy Link
+        </button>
+    </div>
+
+    <div id="video-grid"></div>
+
+    <div class="floating-controls">
+        <div class="glass-dock">
+            <button id="mute-btn" class="dock-item"><i class="fas fa-microphone"></i></button>
+            <button id="camera-btn" class="dock-item"><i class="fas fa-video"></i></button>
+            <button id="screen-btn" class="dock-item"><i class="fas fa-desktop"></i></button>
+            <button onclick="leaveMeeting()" class="dock-item leave"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+
     <script src="/script.js"></script>
 </body>
 
