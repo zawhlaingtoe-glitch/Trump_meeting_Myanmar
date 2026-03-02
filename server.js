@@ -18,19 +18,12 @@ app.use('/peerjs', ExpressPeerServer(server, {
 
 app.use(express.urlencoded({ extended: true }));
 
-/* =============================
+/* ===============================
    ROUTES
-============================= */
+=============================== */
 
 app.get('/', (req, res) => {
     res.render('login');
-});
-
-/* LOGIN (NO DATABASE CHECKING) */
-app.post('/login', (req, res) => {
-    res.render('dashboard', {
-        userName: req.body.username || 'Guest'
-    });
 });
 
 app.get('/dashboard', (req, res) => {
@@ -39,32 +32,30 @@ app.get('/dashboard', (req, res) => {
     });
 });
 
-/* HOST ROOM */
 app.get('/host', (req, res) => {
     res.redirect(`/${uuidV4()}`);
 });
 
-/* JOIN ROOM PAGE */
 app.get('/join', (req, res) => {
     res.render('join');
 });
 
-/* JOIN ROOM POST */
 app.post('/join-room', (req, res) => {
     res.redirect(`/${req.body.roomId}`);
 });
 
-/* ROOM PAGE */
 app.get('/:room', (req, res) => {
+
     res.render('room', {
         roomId: req.params.room,
         userName: 'User'
     });
+
 });
 
-/* =============================
-   SOCKETS
-============================= */
+/* ===============================
+   SOCKET SYSTEM
+=============================== */
 
 io.on('connection', socket => {
 
@@ -82,12 +73,12 @@ io.on('connection', socket => {
 
 });
 
-/* =============================
-   SERVER START
-============================= */
+/* ===============================
+   START SERVER
+=============================== */
 
 const PORT = process.env.PORT || 10000;
 
-server.listen(PORT, '0.0.0.0', () =>
-    console.log(`Server is running on port ${PORT}`)
-);
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+});
