@@ -3,11 +3,19 @@ const videoGrid = document.getElementById('video-grid');
 
 // Use the current window location to find the host automatically
 const myPeer = new Peer(undefined, {
-    path: '/peerjs',
-    host: '/',
+    host: 'trump-meeting-myanmar.onrender.com', // Your Render URL
     port: '443',
-    secure: true
+    path: '/peerjs',
+    secure: true,
+    config: {
+        'iceServers': [
+            { url: 'stun:stun.l.google.com:19302' },
+            { url: 'stun:stun1.l.google.com:19302' }
+        ]
+    }
 });
+
+
 
 const myVideo = document.createElement('video');
 myVideo.muted = true;
@@ -56,10 +64,16 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
 }
 
+
+
 function addVideoStream(video, stream) {
     video.srcObject = stream;
+    // Essential for mobile and modern browsers
+    video.setAttribute('playsinline', true);
+    video.setAttribute('autoplay', true);
+
     video.addEventListener('loadedmetadata', () => {
-        video.play();
+        video.play().catch(err => console.error("Auto-play blocked:", err));
     });
     videoGrid.append(video);
 }
