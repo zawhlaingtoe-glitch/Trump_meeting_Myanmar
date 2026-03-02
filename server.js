@@ -5,7 +5,6 @@ const io = require('socket.io')(server);
 const { v4: uuidV4 } = require('uuid');
 const { ExpressPeerServer } = require('peer');
 
-// Essential for Render/Heroku HTTPS
 app.set('trust proxy', 1);
 
 const peerServer = ExpressPeerServer(server, {
@@ -22,7 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => res.render('login'));
 
 app.post('/login', (req, res) => {
-    // We use a simple render here to avoid session crashes
     res.render('dashboard', { userName: req.body.username || 'Guest' });
 });
 
@@ -38,8 +36,12 @@ app.post('/join-room', (req, res) => {
     res.redirect(`/${req.body.roomId}`);
 });
 
+// FIX: Added userName here to prevent the EJS error
 app.get('/:room', (req, res) => {
-    res.render('room', { roomId: req.params.room });
+    res.render('room', {
+        roomId: req.params.room,
+        userName: 'User' // This provides the missing variable
+    });
 });
 
 // --- SOCKETS ---
