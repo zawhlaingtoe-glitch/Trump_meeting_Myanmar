@@ -1,107 +1,59 @@
-require("dotenv").config();
 const express = require("express");
 const app = express();
-const http = require("http");
-const server = http.createServer(app);
-const socketIO = require("socket.io");
-const io = socketIO(server);
-const fs = require("fs");
-const bcrypt = require("bcryptjs");
-const session = require("express-session");
+const server = require("http").Server(app);
+const io = require("socket.io")(server);
 const { v4: uuidV4 } = require("uuid");
-
-const PORT = process.env.PORT || 3000;
+const session = require("express-session");
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
-
 app.use(session({
-    secret: "zoom-secret",
+    secret: "secret-key",
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 
-function readDB() {
-    return JSON.parse(fs.readFileSync("./db.json"));
-}
-
-function writeDB(data) {
-    fs.writeFileSync("./db.json", JSON.stringify(data, null, 2));
-}
-
-// Routes 
+// Routes
 app.get("/", (req, res) => res.render("login"));
 app.get("/signup", (req, res) => res.render("signup"));
-
-app.post("/signup", async(req, res) => {
-    const { username, password } = req.body;
-    const db = readDB();
-    if (db.users.find(u => u.username === username)) return res.send("User already exists");
-    const hashed = await bcrypt.hash(password, 10);
-    db.users.push({ id: uuidV4(), username, password: hashed });
-    writeDB(db);
-    res.redirect("/");
-});
-
-app.post("/login", async(req, res) => {
-    const { username, password } = req.body;
-    const db = readDB();
-    const user = db.users.find(u => u.username === username);
-    if (!user) return res.send("User not found");
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.send("Wrong password");
-    req.session.user = user;
+app.post("/login", (req, res) => {
+    req.session.userName = req.body.username;
     res.redirect("/dashboard");
 });
-
 app.get("/dashboard", (req, res) => {
-    if (!req.session.user) return res.redirect("/");
-    res.render("dashboard", { userName: req.session.user.username });
+    if (!req.session.userName) return res.redirect("/");
+    res.render("dashboard", { userName: req.session.userName });
+});
+app.get("/host", (req, res) => res.redirect(`/${uuidV4()}`));
+app.get("/join", (req, res) => res.render("join"));
+app.post("/join-room", (req, res) => res.redirect(`/${req.body.roomId}`));
+
+app.get("/:room", (req, res) => {
+    if (!req.session.userName) return res.redirect("/");
+    res.render("room", { roomId: req.params.room, userName: req.session.userName });
 });
 
-app.get("/host", (req, res) => {
-    if (!req.session.user) return res.redirect("/");
-    res.redirect(`/room/${uuidV4()}`);
-});
-
-app.get("/join", (req, res) => {
-    if (!req.session.user) return res.redirect("/");
-    res.render("join");
-});
-
-app.post("/join-room", (req, res) => {
-    res.redirect(`/room/${req.body.roomId}`);
-});
-
-app.get("/room/:roomId", (req, res) => {
-    if (!req.session.user) return res.redirect("/");
-    res.render("room", { roomId: req.params.roomId, userName: req.session.user.username });
-});
-
-// Socket.io WebRTC Signaling 
+// Socket logic
 io.on("connection", socket => {
-    socket.on("join-room", (roomId, userName) => {
+    socket.on("join-room", (roomId, userId) => {
         socket.join(roomId);
-        socket.to(roomId).emit("user-connected", { userId: socket.id, userName });
-    });
+        socket.to(roomId).emit("user-connected", { userId });
 
-    socket.on("webrtc-offer", data => {
-        socket.to(data.to).emit("webrtc-offer", { offer: data.offer, from: socket.id });
-    });
+        socket.on("send-message", (message) => {
+            io.to(roomId).emit("create-message", message, req.session ? .userName || "Guest");
+        });
 
-    socket.on("webrtc-answer", data => {
-        socket.to(data.to).emit("webrtc-answer", { answer: data.answer, from: socket.id });
-    });
+        // WebRTC Signaling
+        socket.on("webrtc-offer", data => socket.to(data.to).emit("webrtc-offer", { from: socket.id, offer: data.offer }));
+        socket.on("webrtc-answer", data => socket.to(data.to).emit("webrtc-answer", { from: socket.id, answer: data.answer }));
+        socket.on("webrtc-ice-candidate", data => socket.to(data.to).emit("webrtc-ice-candidate", { from: socket.id, candidate: data.candidate }));
 
-    socket.on("webrtc-ice-candidate", data => {
-        socket.to(data.to).emit("webrtc-ice-candidate", { candidate: data.candidate, from: socket.id });
-    });
-
-    socket.on("disconnect", () => {
-        socket.broadcast.emit("user-disconnected", socket.id);
+        socket.on("disconnect", () => {
+            socket.to(roomId).emit("user-disconnected", socket.id);
+        });
     });
 });
 
-//const PORT = process.env.PORT || 3000;
-server.listen(PORT);
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
