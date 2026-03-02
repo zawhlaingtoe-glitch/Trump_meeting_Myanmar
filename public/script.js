@@ -1,27 +1,20 @@
 const socket = io('/');
 const videoGrid = document.getElementById('video-grid');
 
-// Use the current window location to find the host automatically
+// PeerJS Configuration for Render
 const myPeer = new Peer(undefined, {
-    host: 'trump-meeting-myanmar.onrender.com', // Your Render URL
-    port: '443',
     path: '/peerjs',
-    secure: true,
-    config: {
-        'iceServers': [
-            { url: 'stun:stun.l.google.com:19302' },
-            { url: 'stun:stun1.l.google.com:19302' }
-        ]
-    }
+    host: 'trump-meeting-myanmar.onrender.com', // Ensure this is your actual Render URL
+    port: '443',
+    secure: true
 });
-
-
 
 const myVideo = document.createElement('video');
 myVideo.muted = true;
 const peers = {};
 let myStream;
 
+// 1. Get Camera and Audio
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
@@ -38,10 +31,12 @@ navigator.mediaDevices.getUserMedia({
     });
 
     socket.on('user-connected', userId => {
-        if (userId !== myPeer.id) {
-            connectToNewUser(userId, stream);
-        }
+        // Give PeerJS a second to initialize before calling
+        setTimeout(() => connectToNewUser(userId, stream), 1000);
     });
+}).catch(err => {
+    console.error("Access denied for camera/mic:", err);
+    alert("Please enable camera and microphone access!");
 });
 
 socket.on('user-disconnected', userId => {
@@ -52,6 +47,7 @@ myPeer.on('open', id => {
     socket.emit('join-room', ROOM_ID, id);
 });
 
+// 2. Helper Functions
 function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream);
     const video = document.createElement('video');
@@ -64,40 +60,71 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
 }
 
-
-
 function addVideoStream(video, stream) {
     video.srcObject = stream;
-    // Essential for mobile and modern browsers
-    video.setAttribute('playsinline', true);
-    video.setAttribute('autoplay', true);
-
+    video.setAttribute('playsinline', true); // Required for iPhone/Safari
     video.addEventListener('loadedmetadata', () => {
-        video.play().catch(err => console.error("Auto-play blocked:", err));
+        video.play();
     });
     videoGrid.append(video);
 }
 
-// Controls
-document.getElementById('mute-btn').onclick = () => {
+// 3. Button Controls (Matching your EJS IDs)
+
+// Mute/Unmute Logic
+const muteBtn = document.getElementById('mute-btn');
+muteBtn.addEventListener('click', () => {
     const enabled = myStream.getAudioTracks()[0].enabled;
-    myStream.getAudioTracks()[0].enabled = !enabled;
-};
+    if (enabled) {
+        myStream.getAudioTracks()[0].enabled = false;
+        muteBtn.classList.add('muted');
+        muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    } else {
+        myStream.getAudioTracks()[0].enabled = true;
+        muteBtn.classList.remove('muted');
+        muteBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    }
+});
 
-document.getElementById('camera-btn').onclick = () => {
+// Camera On/Off Logic
+const cameraBtn = document.getElementById('camera-btn');
+cameraBtn.addEventListener('click', () => {
     const enabled = myStream.getVideoTracks()[0].enabled;
-    myStream.getVideoTracks()[0].enabled = !enabled;
+    if (enabled) {
+        myStream.getVideoTracks()[0].enabled = false;
+        cameraBtn.classList.add('muted'); // Uses your Red CSS class
+        cameraBtn.innerHTML = '<i class="fas fa-video-slash"></i>';
+    } else {
+        myStream.getVideoTracks()[0].enabled = true;
+        cameraBtn.classList.remove('muted');
+        cameraBtn.innerHTML = '<i class="fas fa-video"></i>';
+    }
+});
+
+// Screen Share Logic
+const screenBtn = document.getElementById('screen-btn');
+screenBtn.addEventListener('click', async() => {
+    try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenVideo = document.createElement('video');
+        addVideoStream(screenVideo, screenStream);
+
+        // Stop sharing handler
+        screenStream.getVideoTracks()[0].onended = () => {
+            screenVideo.remove();
+        };
+    } catch (err) {
+        console.error("Screen share error:", err);
+    }
+});
+
+// Leave Meeting
+window.leaveMeeting = () => {
+    window.location.href = "/dashboard";
 };
 
-document.getElementById('screen-btn').onclick = async() => {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-    const video = document.createElement('video');
-    addVideoStream(video, screenStream);
-};
-
+// Copy Link
 window.copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert("Copied!");
+    alert("Meeting Link Copied!");
 };
-
-window.leaveMeeting = () => window.location.href = "/dashboard";
