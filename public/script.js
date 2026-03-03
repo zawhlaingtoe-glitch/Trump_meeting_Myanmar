@@ -106,3 +106,31 @@ socket.on('user-disconnected', userId => {
     const video = document.getElementById(userId);
     if (video) video.remove();
 });
+
+/* ===============================
+   COPY LINK FUNCTIONALITY
+=============================== */
+
+function copyLink() {
+    // Get the current URL from the browser address bar
+    const roomUrl = window.location.href;
+
+    // Use the Clipboard API to copy the text
+    navigator.clipboard.writeText(roomUrl).then(() => {
+        // Find the button to give visual feedback
+        const copyBtn = document.querySelector('.glass-nav .glass-btn');
+        const originalText = copyBtn.innerHTML;
+
+        // Change button text temporarily to show it worked
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        copyBtn.style.background = '#22c55e'; // Green background
+
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.style.background = ''; // Reset to original CSS
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert("Could not copy link. Please copy it manually from the address bar.");
+    });
+}
