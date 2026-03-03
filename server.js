@@ -35,6 +35,25 @@ app.get('/dashboard', (req, res) => {
         userName: 'User'
     });
 });
+
+/* ===============================
+   ROUTES
+=============================== */
+
+app.get('/', (req, res) => {
+    res.render('login');
+});
+
+// ADD THIS ROUTE HERE:
+app.get('/signup', (req, res) => {
+    res.render('signup');
+});
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard', {
+        userName: 'User'
+    });
+});
 /* --- Add this POST route to fix the error --- */
 // Helper function to read the DB
 const getDB = () => JSON.parse(fs.readFileSync(dbPath, 'utf8'));
