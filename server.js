@@ -10,6 +10,10 @@ const { ExpressPeerServer } = require('peer');
 app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 
+const fs = require('fs');
+const path = require('path');
+const dbPath = path.join(__dirname, 'db.json');
+
 app.use(express.static('public'));
 app.use('/peerjs', ExpressPeerServer(server, {
     debug: true,
@@ -32,12 +36,46 @@ app.get('/dashboard', (req, res) => {
     });
 });
 /* --- Add this POST route to fix the error --- */
+// Helper function to read the DB
+const getDB = () => JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+
+// Helper function to save to the DB
+const saveDB = (data) => fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+
+/* ===============================
+   AUTHENTICATION ROUTES
+=============================== */
+
+// LOGIN: Check if user exists in db.json
 app.post('/login', (req, res) => {
-    const userName = req.body.username || 'Guest';
-    // After login, we send them to the dashboard with their name
-    res.render('dashboard', {
-        userName: userName
-    });
+    const { username, password } = req.body;
+    const db = getDB();
+
+    const user = db.users.find(u => u.username === username && u.password === password);
+
+    if (user) {
+        res.render('dashboard', { userName: user.username });
+    } else {
+        // If wrong, send back to login (you can add an error message here)
+        res.redirect('/');
+    }
+});
+
+// SIGNUP: Put new user data into db.json
+app.post('/signup', (req, res) => {
+    const { username, password } = req.body;
+    const db = getDB();
+
+    // Check if user already exists
+    if (db.users.find(u => u.username === username)) {
+        return res.send("User already exists!");
+    }
+
+    // Push new data
+    db.users.push({ username, password });
+    saveDB(db);
+
+    res.redirect('/'); // Redirect to login page after signing up
 });
 app.get('/host', (req, res) => {
     res.redirect(`/${uuidV4()}`);
