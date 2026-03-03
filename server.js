@@ -1,153 +1,76 @@
 const express = require('express');
 const app = express();
-
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-
 const { v4: uuidV4 } = require('uuid');
 const { ExpressPeerServer } = require('peer');
-
-app.set('trust proxy', 1);
-app.set('view engine', 'ejs');
-
 const fs = require('fs');
 const path = require('path');
+
 const dbPath = path.join(__dirname, 'db.json');
 
+app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+
 app.use('/peerjs', ExpressPeerServer(server, {
     debug: true,
     path: '/'
 }));
 
-app.use(express.urlencoded({ extended: true }));
-
-/* ===============================
-   ROUTES
-=============================== */
-
-app.get('/', (req, res) => {
-    res.render('login');
-});
-
-app.get('/dashboard', (req, res) => {
-    res.render('dashboard', {
-        userName: 'User'
-    });
-});
-
-/* ===============================
-   ROUTES
-=============================== */
-
-app.get('/', (req, res) => {
-    res.render('login');
-});
-
-// ADD THIS ROUTE HERE:
-app.get('/signup', (req, res) => {
-    res.render('signup');
-});
-
-app.get('/dashboard', (req, res) => {
-    res.render('dashboard', {
-        userName: 'User'
-    });
-});
-/* --- Add this POST route to fix the error --- */
-// Helper function to read the DB
+// Database Helpers
 const getDB = () => JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-
-// Helper function to save to the DB
 const saveDB = (data) => fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 
-/* ===============================
-   AUTHENTICATION ROUTES
-=============================== */
+/* --- Routes --- */
 
-// LOGIN: Check if user exists in db.json
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-    const db = getDB();
+app.get('/', (req, res) => res.render('login'));
 
-    const user = db.users.find(u => u.username === username && u.password === password);
+app.get('/signup', (req, res) => res.render('signup'));
 
-    if (user) {
-        res.render('dashboard', { userName: user.username });
-    } else {
-        // Change this line to send the error message
-        res.status(404).render('login', { error: "404: User Not Found or Incorrect Password" });
-    }
-});
-
-// SIGNUP: Put new user data into db.json
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
-
-    // 1. Read existing data
-    const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-
-    // 2. Check if user already exists
+    const db = getDB();
     if (db.users.find(u => u.username === username)) {
         return res.status(400).send("User already exists! <a href='/signup'>Try again</a>");
     }
-
-    // 3. Add new user to the array
     db.users.push({ username, password });
-
-    // 4. Save back to db.json
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-
-    // 5. THE FIX: Redirect to the LOGIN page, not the room
+    saveDB(db);
     res.redirect('/');
 });
-app.get('/host', (req, res) => {
-    res.redirect(`/${uuidV4()}`);
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const db = getDB();
+    const user = db.users.find(u => u.username === username && u.password === password);
+    if (user) {
+        res.render('dashboard', { userName: user.username });
+    } else {
+        res.render('login', { error: "Incorrect Username or Password" });
+    }
 });
 
-app.get('/join', (req, res) => {
-    res.render('join');
-});
+app.get('/dashboard', (req, res) => res.render('dashboard', { userName: 'User' }));
 
-app.post('/join-room', (req, res) => {
-    res.redirect(`/${req.body.roomId}`);
-});
+app.get('/host', (req, res) => res.redirect(`/${uuidV4()}`));
+
+app.post('/join-room', (req, res) => res.redirect(`/${req.body.roomId}`));
 
 app.get('/:room', (req, res) => {
-
-    res.render('room', {
-        roomId: req.params.room,
-        userName: 'User'
-    });
-
+    res.render('room', { roomId: req.params.room });
 });
 
-/* ===============================
-   SOCKET SYSTEM
-=============================== */
+/* --- Socket Logic --- */
 
 io.on('connection', socket => {
-
     socket.on('join-room', (roomId, userId) => {
-
         socket.join(roomId);
-
         socket.to(roomId).emit('user-connected', userId);
-
         socket.on('disconnect', () => {
             socket.to(roomId).emit('user-disconnected', userId);
         });
-
     });
-
 });
-
-/* ===============================
-   START SERVER
-=============================== */
 
 const PORT = process.env.PORT || 10000;
-
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
