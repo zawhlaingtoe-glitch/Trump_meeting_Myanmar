@@ -56,8 +56,8 @@ app.post('/login', (req, res) => {
     if (user) {
         res.render('dashboard', { userName: user.username });
     } else {
-        // If wrong, send back to login (you can add an error message here)
-        res.redirect('/');
+        // Change this line to send the error message
+        res.status(404).render('login', { error: "404: User Not Found or Incorrect Password" });
     }
 });
 
