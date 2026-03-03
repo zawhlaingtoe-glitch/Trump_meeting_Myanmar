@@ -13,7 +13,46 @@ const myPeer = new Peer(undefined, {
 });
 
 let myStream;
-const peers = {};
+
+
+const peers = {}; // 1. Make sure this object exists at the top of your script.js
+
+// ... inside your user connection logic ...
+
+socket.on('user-disconnected', userId => {
+    console.log('User disconnected:', userId);
+
+    // 2. Close the Peer connection
+    if (peers[userId]) {
+        peers[userId].close();
+    }
+
+    // 3. Remove the video element from the UI
+    const videoElement = document.getElementById(userId);
+    if (videoElement) {
+        videoElement.remove();
+    }
+});
+
+// ... inside your connectToNewUser function ...
+
+function connectToNewUser(userId, stream) {
+    const call = myPeer.call(userId, stream);
+    const video = document.createElement('video');
+
+    // 4. IMPORTANT: Give the video an ID so we can find it later to remove it
+    video.id = userId;
+
+    call.on('stream', userVideoStream => {
+        addVideoStream(video, userVideoStream);
+    });
+
+    call.on('close', () => {
+        video.remove();
+    });
+
+    peers[userId] = call; // Store the call in our peers object
+}
 
 /* =========================
    CAMERA + AUDIO
@@ -43,8 +82,15 @@ navigator.mediaDevices.getUserMedia({
         peers[call.peer] = call;
     });
 
-    socket.on('user-connected', userId => {
-        setTimeout(() => connectToNewUser(userId, stream), 500);
+    socket.on('user-disconnected', userId => {
+        // 1. Stop the Peer call
+        if (peers[userId]) peers[userId].close();
+
+        // 2. Remove the video element from the Zaw Hlaing Trump Meeting UI
+        const videoElement = document.getElementById(userId);
+        if (videoElement) {
+            videoElement.remove();
+        }
     });
 
 });
@@ -95,8 +141,19 @@ function addVideoStream(video, stream, id) {
    ROOM JOIN
 ========================= */
 
-myPeer.on('open', id => {
-    socket.emit('join-room', ROOM_ID, id);
+myPeer.on('call', (call) => {
+    call.answer(myStream);
+    const video = document.createElement('video');
+
+    call.on('stream', (userVideoStream) => {
+        // We use call.peer here because it's the ID of the person calling us
+        addVideoStream(video, userVideoStream, call.peer);
+    });
+
+    // Clean up if they close the call
+    call.on('close', () => {
+        video.remove();
+    });
 });
 
 /* =========================
@@ -201,3 +258,14 @@ window.copyLink = () => {
 window.leaveMeeting = () => {
     window.location.href = "/dashboard";
 };
+
+socket.on('user-disconnected', (userId) => {
+    if (peers[userId]) {
+        peers[userId].close();
+    }
+    // This looks for the video ID we just set in step 1
+    const videoElement = document.getElementById(userId);
+    if (videoElement) {
+        videoElement.remove();
+    }
+});
