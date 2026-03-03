@@ -64,18 +64,23 @@ app.post('/login', (req, res) => {
 // SIGNUP: Put new user data into db.json
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
-    const db = getDB();
 
-    // Check if user already exists
+    // 1. Read existing data
+    const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+
+    // 2. Check if user already exists
     if (db.users.find(u => u.username === username)) {
-        return res.send("User already exists!");
+        return res.status(400).send("User already exists! <a href='/signup'>Try again</a>");
     }
 
-    // Push new data
+    // 3. Add new user to the array
     db.users.push({ username, password });
-    saveDB(db);
 
-    res.redirect('/'); // Redirect to login page after signing up
+    // 4. Save back to db.json
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+
+    // 5. THE FIX: Redirect to the LOGIN page, not the room
+    res.redirect('/');
 });
 app.get('/host', (req, res) => {
     res.redirect(`/${uuidV4()}`);
