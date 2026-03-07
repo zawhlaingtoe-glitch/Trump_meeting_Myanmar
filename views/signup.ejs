@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
     <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -13,10 +15,20 @@
     <div class="login-wrapper">
         <div class="glass-card">
             <h1 class="glow-text" style="font-size: 2.5rem;">Create Account</h1>
+
+            <% if (locals.error) { %>
+                <div style="color: #ff4444; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; border: 1px solid #ff4444;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <%= error %>
+                </div>
+            <% } %>
+
             <form action="/signup" method="POST">
                 <input type="text" name="username" placeholder="Choose Username" required>
                 <input type="password" name="password" placeholder="Choose Password" required>
-                <button type="submit" class="glass-btn">Create Account</button>
+                <button type="submit" class="glass-btn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
             </form>
             <div style="margin-top: 20px; font-size: 0.9rem; color: #94a3b8;">
                 Already have an account? <a href="/" style="color: var(--accent);">Login</a>
@@ -25,4 +37,4 @@
     </div>
 </body>
 
-</html>s
+</html>
